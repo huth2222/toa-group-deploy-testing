@@ -20,6 +20,7 @@ jobs:
           script: |
             cd /home/ubuntu/toa-group-deploy-testing
             git pull origin main
+            rm -f package-lock.json
             docker compose down
             docker compose up -d --build
             docker image prune -f
