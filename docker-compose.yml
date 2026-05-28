@@ -1,10 +1,10 @@
 services:
-  toa-group:
+  toa-group-deploy-testing:
     build:
       context: .
       dockerfile: Dockerfile
-    image: toa-group:1.0.0
-    container_name: toa-group
+    image: toa-group-deploy-testing:1.0.0
+    container_name: toa-group-deploy-testing
     ports:
       - "3000:3000"
     networks:
