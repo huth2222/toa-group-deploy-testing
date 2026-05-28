@@ -1,9 +1,84 @@
 services:
-  app:
-    container_name: toa-group-deploy-testing
+  toa-group:
     build:
-      context: .
+      context: ./
+      dockerfile: ./Dockerfile
+    image: toa-group:1.0.0
+    ports:
+      - 3000:3000
+    networks:
+      - network_services
+    restart: unless-stopped
+
+    # Resource Limits - Prevent memory/CPU exhaustion
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0" # Maximum 2 CPU cores
+          memory: 2G # Maximum 2GB RAM
+        reservations:
+          cpus: "0.5" # Minimum 0.5 CPU
+          memory: 512M # Minimum 512MB RAM
+
+    # Health Check - Auto-restart if unhealthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Logging Limits - Prevent disk fill
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Environment variables
+    environment:
+      NODE_ENV: production
+      NODE_OPTIONS: "--max-old-space-size=1536" # Limit Node.js heap to 1.5GB
+
+  nginx:
+    build:
+      context: "./nginx"
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
-    restart: always
+      - "80:80"
+    links:
+      - toa-group:toa-group
+    networks:
+      - network_services
+    restart: unless-stopped
+
+    # Resource Limits for Nginx
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+
+    # Health Check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+    # Logging Limits
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+    environment:
+      TZ: "Asia/Bangkok"
+
+networks:
+  network_services:
+    driver: bridge
