@@ -29,7 +29,7 @@ services:
     ports:
       - "80:80"
     depends_on:
-      toa-group:
+      toa-group-deploy-testing:
         condition: service_healthy
     networks:
       - network_services
