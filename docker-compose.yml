@@ -28,9 +28,6 @@ services:
     container_name: toa-group-deploy-testing-nginx
     ports:
       - "80:80"
-    depends_on:
-      toa-group-deploy-testing:
-        condition: service_healthy
     networks:
       - network_services
     restart: unless-stopped
